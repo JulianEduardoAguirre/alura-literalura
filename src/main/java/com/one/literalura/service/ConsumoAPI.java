@@ -21,6 +21,7 @@ public class ConsumoAPI {
             throw new RuntimeException(e);
         }
 
+        System.out.println(response.statusCode());
         return response.body();
     }
 
