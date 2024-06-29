@@ -12,11 +12,11 @@ public class Menu {
                     **** Bienvenido a LiterAlura ****
                     Ingrese el número correspondiente a su consulta
                     
-                    1) Buscar por título
-                    2) Mostrar libros registrados
-                    3) Mostrar autores registrados
-                    4) Mostrar libros por idioma
-                    5) Mostrar top 5 descargas
+                    1) Buscar libro por título
+                    2) Listar libros registrados
+                    3) Listar autores registrados
+                    4) Listar autores vivos en un determinado año
+                    5) Listar libros por idioma
                     
                     0) Salir
                     """);
