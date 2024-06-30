@@ -1,5 +1,8 @@
 package com.one.literalura.model;
 
+import org.springframework.cglib.core.Local;
+
+import java.time.LocalDate;
 import java.util.List;
 
 public class Autor {
@@ -11,6 +14,12 @@ public class Autor {
     private List<Libro> libros;
 
     public Autor() {
+    }
+
+    public Autor(DatosAutor datosAutor) {
+        this.nombre = datosAutor.nombre();
+        this.fechaDeNacimiento = datosAutor.fechaDeNacimiento();
+        this.fechaDeFallecimiento = datosAutor.fechaDeFallecimiento();
     }
 
     @Override

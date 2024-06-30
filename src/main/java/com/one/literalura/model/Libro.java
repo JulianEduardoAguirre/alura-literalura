@@ -1,12 +1,23 @@
 package com.one.literalura.model;
 
+import java.util.List;
+import java.util.OptionalInt;
+
 public class Libro {
     private Long id;
     private String titulo;
     private Autor autor;
+    private List<String> idiomas;
     private Integer numeroDeDescargas;
 
-    public Libro() {
+    public Libro () {
+    }
+
+    public Libro (DatosLibro datosLibro) {
+        this.titulo = datosLibro.titulo();
+        this.autor = new Autor(datosLibro.autores().get(0));
+        this.idiomas = datosLibro.idiomas();
+        this.numeroDeDescargas = OptionalInt.of(datosLibro.descargas()).orElse(0);
     }
 
     public Long getId() {
