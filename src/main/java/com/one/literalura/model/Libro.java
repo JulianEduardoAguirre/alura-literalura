@@ -1,11 +1,19 @@
 package com.one.literalura.model;
 
+import jakarta.persistence.*;
+
 import java.util.List;
 import java.util.OptionalInt;
 
+@Entity
+@Table(name = "libros")
 public class Libro {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String titulo;
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "autor_id")
     private Autor autor;
     private List<String> idiomas;
     private Integer numeroDeDescargas;
