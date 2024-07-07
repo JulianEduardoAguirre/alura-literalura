@@ -18,8 +18,8 @@ public class Principal {
 
     private final String BASE_URL = "http://gutendex.com/books/";
     public void menuPrincipal() {
-        var opcion = -1;
-        while (opcion != 0) {
+        var opcion = "";
+        while (!opcion.equals("0")) {
             System.out.println("""
                     **** Bienvenido a LiterAlura ****
                     Ingrese el número correspondiente a su consulta
@@ -33,31 +33,31 @@ public class Principal {
                     0) Salir
                     """);
 
-            opcion = scanner.nextInt();
+            opcion = scanner.next();
             switchMenuPrincipal(opcion);
         }
     }
 
 
 
-    private void switchMenuPrincipal(Integer opcion) {
+    private void switchMenuPrincipal(String opcion) {
     switch (opcion) {
-        case 1:
+        case "1":
             buscarLibroPorTitulo();
             break;
-        case 2:
+        case "2":
             mostrarListaDeLibros();
             break;
-        case 3:
+        case "3":
             mostrarListaDeAutores();
             break;
-        case 4:
+        case "4":
             mostrarAutorVivoEnFecha();
             break;
-        case 5:
+        case "5":
             mostrarLibrosPorIdioma();
             break;
-        case 0:
+        case "0":
             System.out.println("Finalizando el programa.");
             break;
         default:
@@ -84,7 +84,7 @@ public class Principal {
 
     private void buscarLibroPorTitulo() {
         System.out.println("Inserte el título del libro a buscar");
-        var tituloLibro = scanner.nextLine();
+        var tituloLibro = scanner.next();
         var json = consumoAPI.obtenerDatos(BASE_URL + "?search=" + tituloLibro.replace(" ", "+"));
         var datosBusqueda = conversor.obtenerDatos(json, DatosTotal.class);
         Optional<DatosLibro> libroBuscado = datosBusqueda.resultados().stream()
