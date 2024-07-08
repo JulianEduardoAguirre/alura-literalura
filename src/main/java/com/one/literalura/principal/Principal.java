@@ -1,9 +1,6 @@
 package com.one.literalura.principal;
 
-import com.one.literalura.model.Autor;
-import com.one.literalura.model.DatosLibro;
-import com.one.literalura.model.DatosTotal;
-import com.one.literalura.model.Libro;
+import com.one.literalura.model.*;
 import com.one.literalura.repository.AutorRepository;
 import com.one.literalura.repository.LibroRepository;
 import com.one.literalura.service.AutorService;
@@ -89,7 +86,19 @@ public class Principal {
     }
 
     private void mostrarAutorVivoEnFecha() {
-        System.out.println("El autor X estaba vivo en...");
+
+        var anio = pedirAnio();
+
+        List<Autor> autoresVivos =  autorRepository.findAll().stream()
+                .filter(autor -> autor.getFechaDeNacimiento() != null && autor.getFechaDeNacimiento() <= anio)
+                .filter(autor -> autor.getFechaDeFallecimiento() == null || autor.getFechaDeFallecimiento() >= anio)
+                .collect(Collectors.toList());
+
+        if (autoresVivos.isEmpty()){
+            System.out.println("No habían autores vivos ese año");
+        } else {
+            autoresVivos.forEach(System.out::println);
+        }
     }
 
     private void mostrarLibrosPorIdioma() {
@@ -106,7 +115,9 @@ public class Principal {
                 .map(Autor::toString)
                 .collect(Collectors.toList());
 
-        System.out.println(autoresString);
+//        System.out.println(autoresString);
+
+        autoresString.forEach(System.out::println);
 
     }
 
@@ -116,7 +127,8 @@ public class Principal {
         List<Libro> librosGuardados = libroRepository.findAll();
 
 
-        System.out.println(librosGuardados);
+//        System.out.println(librosGuardados);
+        librosGuardados.forEach(System.out::println);
     }
 
     //De momento, está trayendo todos los resultados, los cuales pueden ser mayor que 1
@@ -132,15 +144,30 @@ public class Principal {
                 .filter(l -> l.titulo().toUpperCase().contains(tituloLibro.toUpperCase()))
                 .findFirst();
         if(libroBuscado.isPresent()){
-            System.out.println("Libro encontrado ");
-            System.out.println(libroBuscado.get());
-            DatosLibro datosLibro = libroBuscado.get();
 
-            Libro libro = new Libro(datosLibro);
+            Optional<Libro> libroPorApiId = Optional.ofNullable(libroRepository.findByApiId(libroBuscado.get().apiId()));
+            System.out.println("ALGO");
+            if(libroPorApiId.isPresent()){
+                System.out.println("El libro ya se encuentra en la base de datos");
+            } else {
+                System.out.println("Libro encontrado ");
+//            System.out.println(libroBuscado.get());
+                DatosLibro datosLibro = libroBuscado.get();
 
-            libroRepository.save(libro);
+                DatosAutor datosAutor = datosLibro.autores().get(0);
+                Optional<Autor> autorEnBaseDeDatos = Optional.ofNullable(autorRepository.findByNombreIgnoreCase(datosAutor.nombre()));
 
-            System.out.println("Libro guardado en la base de datos");
+                Libro libro = new Libro(datosLibro);
+                autorEnBaseDeDatos.ifPresent(libro::setAutor);
+
+
+                libroRepository.save(libro);
+
+                System.out.println("Libro guardado en la base de datos");
+            }
+
+
+
 
         } else {
             System.out.println("No se encontró el libro");
@@ -152,6 +179,25 @@ public class Principal {
         String tituloLibro = scanner.next();
 //        String json = consumoAPI.obtenerDatos(BASE_URL + );
     }
+
+    private boolean IsInteger(String text) {
+        try {
+            Integer.parseInt(text);
+            return true;
+        } catch (NumberFormatException ex) {
+            return false;
+        }
+    }
+
+    public Double pedirAnio() {
+        String anioString;
+        do {
+            System.out.println("Ingrese el año: ");
+            anioString = scanner.next();
+        } while (!IsInteger(anioString));
+        return Double.parseDouble(anioString);
+    }
+
 
 //    public void muestraElMenu() {
 //        var json = consumoAPI.obtenerDatos(BASE_URL);

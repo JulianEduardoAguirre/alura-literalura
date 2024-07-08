@@ -17,6 +17,7 @@ public class Libro {
     private Autor autor;
     private List<String> idiomas;
     private Integer numeroDeDescargas;
+    private Long apiId;
 
     public Libro () {
     }
@@ -26,6 +27,15 @@ public class Libro {
         this.autor = new Autor(datosLibro.autores().get(0));
         this.idiomas = datosLibro.idiomas();
         this.numeroDeDescargas = OptionalInt.of(datosLibro.descargas()).orElse(0);
+        this.apiId = datosLibro.apiId();
+    }
+
+    public Long getApiId() {
+        return apiId;
+    }
+
+    public void setApiId(Long apiId) {
+        apiId = apiId;
     }
 
     public Long getId() {
@@ -67,6 +77,7 @@ public class Libro {
                 ", titulo='" + titulo + '\'' +
                 ", autor=" + autor +
                 ", numeroDeDescargas=" + numeroDeDescargas +
+                ", apiId=" + apiId +
                 '}';
     }
 }

@@ -14,6 +14,8 @@ public record DatosLibro(
         @JsonAlias("languages")
         List<String> idiomas,
         @JsonAlias("download_count")
-        Integer descargas
+        Integer descargas,
+        @JsonAlias("id")
+        Long apiId
 ) {
 }
