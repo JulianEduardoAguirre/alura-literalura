@@ -15,6 +15,7 @@ public class Libro {
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "autor_id")
     private Autor autor;
+    @ElementCollection
     private List<String> idiomas;
     private Integer numeroDeDescargas;
     private Long apiId;

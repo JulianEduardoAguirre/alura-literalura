@@ -103,6 +103,15 @@ public class Principal {
 
     private void mostrarLibrosPorIdioma() {
         System.out.println("Mostrando libros por idiomas");
+        var idiomaBuscado = scanner.next();
+
+        List<Libro> librosPorIdioma = libroRepository.findByIdiomasContaining(idiomaBuscado);
+        if (librosPorIdioma.isEmpty()) {
+            System.out.println("No hay libros en ese idioma ");
+        } else {
+            librosPorIdioma.forEach(System.out::println);
+        }
+
     }
 
     private void mostrarListaDeAutores() {
