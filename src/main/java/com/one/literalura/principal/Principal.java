@@ -76,6 +76,9 @@ public class Principal {
         case "5":
             mostrarLibrosPorIdioma();
             break;
+        case "6":
+            System.out.println(libroRepository.findTop1ByOrderByNumeroDeDescargasDesc());
+            break;
         case "0":
             System.out.println("Finalizando el programa.");
             break;
