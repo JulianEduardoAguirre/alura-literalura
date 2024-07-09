@@ -15,8 +15,11 @@ public class Libro {
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "autor_id")
     private Autor autor;
-    @ElementCollection
-    private List<String> idiomas;
+
+//    @ElementCollection        //Usado para generar una tabla intermedia para un listado de idiomas
+//    private List<String> idiomas;
+    private String idioma;
+
     private Integer numeroDeDescargas;
     private Long apiId;
 
@@ -26,7 +29,8 @@ public class Libro {
     public Libro (DatosLibro datosLibro) {
         this.titulo = datosLibro.titulo();
         this.autor = new Autor(datosLibro.autores().get(0));
-        this.idiomas = datosLibro.idiomas();
+//        this.idiomas = datosLibro.idiomas();  // Anteriormente, se creaba una lista de los idiomas
+        this.idioma = datosLibro.idiomas().get(0);
         this.numeroDeDescargas = OptionalInt.of(datosLibro.descargas()).orElse(0);
         this.apiId = datosLibro.apiId();
     }
@@ -51,6 +55,14 @@ public class Libro {
         return titulo;
     }
 
+    public String getIdioma() {
+        return idioma;
+    }
+
+    public void setIdioma(String idioma) {
+        this.idioma = idioma;
+    }
+
     public void setTitulo(String titulo) {
         this.titulo = titulo;
     }
@@ -73,13 +85,7 @@ public class Libro {
 
     @Override
     public String toString() {
-//        return "Libro{" +
-//                "id=" + id +
-//                ", titulo='" + titulo + '\'' +
-//                ", autor=" + autor +
-//                ", numeroDeDescargas=" + numeroDeDescargas +
-//                ", apiId=" + apiId +
-//                '}';
+
         return String.format("_________________Libro__________________" +
                 "\nTítulo   :  %s\nAutor    :  %s\nDescargas:  %s\n" +
                 "_________________________________________\n", titulo, autor.getNombre(), numeroDeDescargas);
