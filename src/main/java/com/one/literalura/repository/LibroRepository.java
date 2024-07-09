@@ -17,5 +17,5 @@ public interface LibroRepository extends JpaRepository<Libro, Long> {
 
     List<Libro> findTop1ByOrderByNumeroDeDescargasDesc();
 
-    List<Libro> findTop5ByOrderByNumeroDeDescargasDesc();
+    List<Libro> findTop10ByOrderByNumeroDeDescargasDesc();
 }

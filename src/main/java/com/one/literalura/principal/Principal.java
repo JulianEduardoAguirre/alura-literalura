@@ -58,45 +58,24 @@ public class Principal {
 
 
     private void switchMenuPrincipal(String opcion) {
-    switch (opcion) {
-        case "1":
-            buscarLibroPorTitulo();
-            break;
-        case "2":
-            mostrarListaDeLibros();
-            break;
-        case "3":
-            mostrarListaDeAutores();
-            break;
-        case "4":
-            mostrarAutorVivoEnFecha();
-            break;
-        case "5":
-            menuIdiomas();
-            break;
-        case "6":
-            mostrarLibrosPorIdioma();
-            break;
-        case "7":
-            mostrarLibroMasDescargado();
-            break;
-        case "8":
-            mostrarAutorMasJoven();
-            break;
-        case "9":
-            mostrarTop5Descargas();
-            break;
-        case "0":
-            System.out.println("Finalizando el programa.");
-            break;
-        default:
-            System.out.println("Opción inválida");
-    }
+        switch (opcion) {
+            case "1" -> buscarLibroPorTitulo();
+            case "2" -> mostrarListaDeLibros();
+            case "3" -> mostrarListaDeAutores();
+            case "4" -> mostrarAutorVivoEnFecha();
+            case "5" -> menuIdiomas();
+            case "6" -> mostrarLibrosPorIdioma();
+            case "7" -> mostrarLibroMasDescargado();
+            case "8" -> mostrarAutorMasJoven();
+            case "9" -> mostrarTop10Descargas();
+            case "0" -> System.out.println("Finalizando el programa.");
+            default -> System.out.println("Opción inválida");
+        }
 
     }
 
-    private void mostrarTop5Descargas() {
-        List<Libro> topDescargados = libroRepository.findTop5ByOrderByNumeroDeDescargasDesc();
+    private void mostrarTop10Descargas() {
+        List<Libro> topDescargados = libroRepository.findTop10ByOrderByNumeroDeDescargasDesc();
         topDescargados.forEach(System.out::println);
     }
 
@@ -130,23 +109,12 @@ public class Principal {
 
     public void switchIdiomas(String opcionIdioma) {
         switch (opcionIdioma) {
-            case "1":
-                mostrarCantidadDeLibrosPorIdioma("es", "español");
-                break;
-            case "2":
-                mostrarCantidadDeLibrosPorIdioma("en", "inglés");
-                break;
-            case "3":
-                mostrarCantidadDeLibrosPorIdioma("fr", "francés");
-                break;
-            case "4":
-                mostrarCantidadDeLibrosPorIdioma("de", "alemán");
-                break;
-            case "0":
-                System.out.println("..............");
-                break;
-            default:
-                System.out.println("Opción inválida");
+            case "1" -> mostrarCantidadDeLibrosPorIdioma("es", "español");
+            case "2" -> mostrarCantidadDeLibrosPorIdioma("en", "inglés");
+            case "3" -> mostrarCantidadDeLibrosPorIdioma("fr", "francés");
+            case "4" -> mostrarCantidadDeLibrosPorIdioma("de", "alemán");
+            case "0" -> System.out.println("..............");
+            default -> System.out.println("Opción inválida");
         }
     }
 
