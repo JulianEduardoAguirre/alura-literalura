@@ -3,11 +3,8 @@ package com.one.literalura.principal;
 import com.one.literalura.model.*;
 import com.one.literalura.repository.AutorRepository;
 import com.one.literalura.repository.LibroRepository;
-import com.one.literalura.service.AutorService;
 import com.one.literalura.service.ConsumoAPI;
 import com.one.literalura.service.ConvierteDatos;
-import com.one.literalura.service.LibroService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -44,7 +41,11 @@ public class Principal {
                     2) Listar libros registrados
                     3) Listar autores registrados
                     4) Listar autores vivos en un determinado año
-                    5) Listar libros por idioma
+                    5) Mostrar número de libros por idioma
+                    6) Listar libros por idioma
+                    7) Mostrar libro más descargado
+                    8) Mostrar autor más joven
+                    9) Mostrar top 5 descargas
                     
                     0) Salir
                     """);
@@ -71,13 +72,19 @@ public class Principal {
             mostrarAutorVivoEnFecha();
             break;
         case "5":
-            mostrarLibrosPorIdioma();
+            menuIdiomas();
             break;
         case "6":
-            System.out.println(libroRepository.findTop1ByOrderByNumeroDeDescargasDesc());
+            mostrarLibrosPorIdioma();
             break;
         case "7":
-            System.out.println(autorRepository.findTop1ByFechaDeNacimientoNotNullOrderByFechaDeNacimientoDesc());
+            mostrarLibroMasDescargado();
+            break;
+        case "8":
+            mostrarAutorMasJoven();
+            break;
+        case "9":
+            mostrarTop5Descargas();
             break;
         case "0":
             System.out.println("Finalizando el programa.");
@@ -88,6 +95,72 @@ public class Principal {
 
     }
 
+    private void mostrarTop5Descargas() {
+        List<Libro> topDescargados = libroRepository.findTop5ByOrderByNumeroDeDescargasDesc();
+        topDescargados.forEach(System.out::println);
+    }
+
+    private void mostrarAutorMasJoven() {
+        System.out.println(autorRepository.findTop1ByFechaDeNacimientoNotNullOrderByFechaDeNacimientoDesc());
+    }
+
+    private void mostrarLibroMasDescargado() {
+        System.out.println(libroRepository.findTop1ByOrderByNumeroDeDescargasDesc());
+    }
+
+    public void menuIdiomas() {
+        var opcionIdioma = "";
+        while (!opcionIdioma.equals("0")) {
+            System.out.println("""
+                    ***********************************************
+                    Ingrese el número correspondiente al idioma deseado
+                    
+                    1) Español
+                    2) Inglés
+                    3) Francés
+                    4) Alemán
+                    
+                    0) Volver
+                    """);
+
+            opcionIdioma = scanner.next();
+            switchIdiomas(opcionIdioma);
+        }
+    }
+
+    public void switchIdiomas(String opcionIdioma) {
+        switch (opcionIdioma) {
+            case "1":
+                mostrarCantidadDeLibrosPorIdioma("es", "español");
+                break;
+            case "2":
+                mostrarCantidadDeLibrosPorIdioma("en", "inglés");
+                break;
+            case "3":
+                mostrarCantidadDeLibrosPorIdioma("fr", "francés");
+                break;
+            case "4":
+                mostrarCantidadDeLibrosPorIdioma("de", "alemán");
+                break;
+            case "0":
+                System.out.println("..............");
+                break;
+            default:
+                System.out.println("Opción inválida");
+        }
+    }
+
+    private void mostrarCantidadDeLibrosPorIdioma(String abreviacion, String idioma) {
+        List<Libro> librosPorIdioma = libroRepository.findByIdioma(abreviacion);
+        int cantidad = librosPorIdioma.size();
+
+        if (librosPorIdioma.isEmpty()) {
+            System.out.println("Sin existencias de libros en " + idioma);
+        } else {
+            System.out.println((cantidad == 1? "Se encontró " + cantidad + " libro" : "Se encontraron " + cantidad + " libros") + " en " + idioma);
+        }
+
+    }
     private void mostrarAutorVivoEnFecha() {
 
         var anio = pedirAnio();
@@ -108,7 +181,8 @@ public class Principal {
         System.out.println("Mostrando libros por idiomas");
         var idiomaBuscado = scanner.next();
 
-        List<Libro> librosPorIdioma = libroRepository.findByIdiomasContaining(idiomaBuscado);
+//        List<Libro> librosPorIdioma = libroRepository.findByIdiomasContaining(idiomaBuscado);
+        List<Libro> librosPorIdioma = libroRepository.findByIdioma(idiomaBuscado);
         if (librosPorIdioma.isEmpty()) {
             System.out.println("No hay libros en ese idioma ");
         } else {
