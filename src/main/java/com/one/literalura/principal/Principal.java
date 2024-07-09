@@ -7,6 +7,7 @@ import com.one.literalura.service.ConsumoAPI;
 import com.one.literalura.service.ConvierteDatos;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -155,17 +156,27 @@ public class Principal {
 
     }
     private void mostrarAutorVivoEnFecha() {
+        double anioActual = (double) LocalDate.now().getYear();
+        Double anio = -1.0;
+        do {
+            anio = pedirAnio();
+            if (anio <= 0 || anio > anioActual) {
+                System.out.println("Periodo válido: 0 - " + (int)anioActual);
+            }
 
-        var anio = pedirAnio();
+        } while (anio <= 0 || anio > anioActual);
+
+        Double finalAnio = anio;
 
         List<Autor> autoresVivos =  autorRepository.findAll().stream()
-                .filter(autor -> autor.getFechaDeNacimiento() != null && autor.getFechaDeNacimiento() <= anio)
-                .filter(autor -> autor.getFechaDeFallecimiento() == null || autor.getFechaDeFallecimiento() >= anio)
+                .filter(autor -> autor.getFechaDeNacimiento() != null && autor.getFechaDeNacimiento() <= finalAnio)
+                .filter(autor -> autor.getFechaDeFallecimiento() == null || autor.getFechaDeFallecimiento() >= finalAnio)
                 .collect(Collectors.toList());
 
         if (autoresVivos.isEmpty()){
             System.out.println("No habían autores vivos ese año");
         } else {
+            System.out.println("Se encontraron los siguientes autores vivos en el año " + finalAnio.intValue());
             autoresVivos.forEach(System.out::println);
         }
     }
