@@ -9,7 +9,5 @@ import java.util.List;
 @Repository
 public interface AutorRepository extends JpaRepository<Autor, Long> {
     Autor findByNombreIgnoreCase(String nombre);
-
-//    List<Autor> findTop1ByOrderByFechaDeNacimientoAndFechaDeNacimientoNotNullDesc();
     List<Autor> findTop1ByFechaDeNacimientoNotNullOrderByFechaDeNacimientoDesc();
 }

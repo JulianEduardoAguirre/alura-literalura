@@ -32,13 +32,9 @@ public class Autor {
 
     @Override
     public String toString() {
-        return "Autor{" +
-                "id=" + id +
-                ", nombre='" + nombre + '\'' +
-                ", fechaDeNacimiento=" + fechaDeNacimiento +
-                ", fechaDeFallecimiento=" + fechaDeFallecimiento +
-//                ", libros=" + libros +
-                '}';
+        return String.format("****************************************" +
+                "\nNombre: %s\nAño de nacimiento: %s\nAño de fallecimiento: %s\n" +
+                "****************************************\n", nombre, fechaDeNacimiento, fechaDeFallecimiento);
     }
 
     public Long getId() {

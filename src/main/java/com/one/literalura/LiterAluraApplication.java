@@ -29,19 +29,8 @@ public class LiterAluraApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-//		var consumoAPI = new ConsumoAPI();
-//		var conversor = new ConvierteDatos();
-//		var json = consumoAPI.obtenerDatos("http://gutendex.com/books?search=don+quijote");
-//		var json = consumoAPI.obtenerDatos("http://gutendex.com/books/");
-//		System.out.println(json);
-
-//		var datos = conversor.obtenerDatos(json, DatosTotal.class);
-//		System.out.println(datos.getClass());
-//		ArrayList<DatosLibro> listaTotal = new ArrayList<>(datos.resultados());
-//		System.out.println(listaTotal.get(5));
 
 		Principal principal = new Principal(libroRepository, autorRepository);
-//		principal.muestraElMenu();
 		principal.menuPrincipal();
 
 

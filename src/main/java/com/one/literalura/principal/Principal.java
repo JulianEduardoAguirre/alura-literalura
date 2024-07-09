@@ -10,10 +10,7 @@ import com.one.literalura.service.LibroService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.IntSummaryStatistics;
-import java.util.List;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -125,14 +122,21 @@ public class Principal {
         System.out.println("Mostrando lista de autores");
         List<Autor> autores = autorRepository.findAll();
 
-        List<String> autoresString = autores.stream()
-                .sorted((a1, a2) -> a1.getNombre().compareToIgnoreCase(a2.getNombre()))
-                .map(Autor::toString)
-                .collect(Collectors.toList());
+//        List<Autor> toSort = new ArrayList<>(autores);
+//        toSort.sort((a1, a2) -> a1.getNombre().compareToIgnoreCase(a2.getNombre()));
+//        List<String> autoresString = new ArrayList<>();
+//        for (Autor autor : toSort) {
+//            String string = autor.toString();
+//            autoresString.add(string);
+//        }
 
-//        System.out.println(autoresString);
+        List<String> autoresStr = autores.stream().
+                sorted((a1, a2) -> a1.getNombre().compareToIgnoreCase(a2.getNombre()))
+                        .map(Autor::toString)
+                                .collect(Collectors.toList());
 
-        autoresString.forEach(System.out::println);
+
+        autoresStr.forEach(System.out::println);
 
     }
 
@@ -146,53 +150,44 @@ public class Principal {
         librosGuardados.forEach(System.out::println);
     }
 
-    //De momento, está trayendo todos los resultados, los cuales pueden ser mayor que 1
-    //Modificar para indicar que se encontraron "X" resultados (cuando count != 0) o "No se encontró el libro" (count == 0)
     private void buscarLibroPorTitulo() {
+    // Realiza la consulta, trae todos los libros con esa palabra en el título y retiene SOLAMENTE el primer resultado
         System.out.println("Inserte el título del libro a buscar");
         var tituloLibro = scanner.next();
         var json = consumoAPI.obtenerDatos(BASE_URL + "?search=" + tituloLibro.replace(" ", "+"));
-//        libroService.buscarLibroPorTitulo(tituloLibro, json);
         var datosBusqueda = conversor.obtenerDatos(json, DatosTotal.class);
-//        System.out.println(datosBusqueda);
+
         Optional<DatosLibro> libroBuscado = datosBusqueda.resultados().stream()
                 .filter(l -> l.titulo().toUpperCase().contains(tituloLibro.toUpperCase()))
                 .findFirst();
+
         if(libroBuscado.isPresent()){
 
             Optional<Libro> libroPorApiId = Optional.ofNullable(libroRepository.findByApiId(libroBuscado.get().apiId()));
-            System.out.println("ALGO");
+
             if(libroPorApiId.isPresent()){
                 System.out.println("El libro ya se encuentra en la base de datos");
             } else {
                 System.out.println("Libro encontrado ");
-//            System.out.println(libroBuscado.get());
+
                 DatosLibro datosLibro = libroBuscado.get();
 
                 DatosAutor datosAutor = datosLibro.autores().get(0);
+
                 Optional<Autor> autorEnBaseDeDatos = Optional.ofNullable(autorRepository.findByNombreIgnoreCase(datosAutor.nombre()));
 
                 Libro libro = new Libro(datosLibro);
-                autorEnBaseDeDatos.ifPresent(libro::setAutor);
 
+                autorEnBaseDeDatos.ifPresent(libro::setAutor);
 
                 libroRepository.save(libro);
 
-                System.out.println("Libro guardado en la base de datos");
+                System.out.println("Se guardó el libro en la base de datos");
             }
 
-
-
-
         } else {
-            System.out.println("No se encontró el libro");
+            System.out.println("No se encontró ningún libro con esa palabra en el título.");
         }
-    }
-
-    private void buscarLibroPorTituloGeneral() {
-        System.out.println("Inserte el título del libro a buscar");
-        String tituloLibro = scanner.next();
-//        String json = consumoAPI.obtenerDatos(BASE_URL + );
     }
 
     private boolean IsInteger(String text) {
