@@ -37,15 +37,16 @@ public class Principal {
                     **** Bienvenido a LiterAlura ****
                     Ingrese el número correspondiente a su consulta
                     
-                    1) Buscar libro por título
-                    2) Listar libros registrados
-                    3) Listar autores registrados
-                    4) Listar autores vivos en un determinado año
-                    5) Mostrar número de libros por idioma
-                    6) Listar libros por idioma
-                    7) Mostrar libro más descargado
-                    8) Mostrar autor más joven
-                    9) Mostrar top 5 descargas
+                    1)  Buscar libro por título
+                    2)  Listar libros registrados
+                    3)  Listar autores registrados
+                    4)  Listar autores vivos en un determinado año
+                    5)  Mostrar número de libros por idioma
+                    6)  Listar libros por idioma
+                    7)  Mostrar libro más descargado
+                    8)  Mostrar autor más joven
+                    9)  Mostrar top 5 libros descargados
+                    10) Mostrar estadísticas
                     
                     0) Salir
                     """);
@@ -68,6 +69,7 @@ public class Principal {
             case "7" -> mostrarLibroMasDescargado();
             case "8" -> mostrarAutorMasJoven();
             case "9" -> mostrarTop10Descargas();
+            case "10" -> mostrarEstadisticas();
             case "0" -> System.out.println("Finalizando el programa.");
             default -> System.out.println("Opción inválida");
         }
@@ -256,31 +258,16 @@ public class Principal {
     }
 
 
-//    public void muestraElMenu() {
-//        var json = consumoAPI.obtenerDatos(BASE_URL);
-////        System.out.println(json);
-//        var datosTodos = conversor.obtenerDatos(json, DatosTotal.class);
-//
-//        //Búsqueda de libros por nombre
-//        System.out.println("Inserte el título del libro a buscar");
-//        var tituloLibro = scanner.nextLine();
-//        json = consumoAPI.obtenerDatos(BASE_URL + "?search=" + tituloLibro.replace(" ", "+"));
-//        var datosBusqueda = conversor.obtenerDatos(json, DatosTotal.class);
-//        Optional<DatosLibro> libroBuscado = datosBusqueda.resultados().stream()
-//                .filter(l -> l.titulo().toUpperCase().contains(tituloLibro.toUpperCase()))
-//                .findFirst();
-//        if(libroBuscado.isPresent()){
-//            System.out.println("Libro encontrado ");
-//            System.out.println(libroBuscado.get());
-//        } else {
-//            System.out.println("No se encontró el libro");
-//        }
-//
-//        //Trabajando con estadísticas
-//        IntSummaryStatistics est = datosTodos.resultados().stream()
-//                .filter(d -> d.descargas() > 0)
-//                .collect(Collectors.summarizingInt(DatosLibro::descargas));
-//        System.out.println("Cantidad media de descargas: " + est.getAverage());
-//        System.out.println("Cantidad máxima de descargas: " + est.getMax());
-//    }
+    public void mostrarEstadisticas() {
+
+        //Trabajando con estadísticas
+        DoubleSummaryStatistics estadisticas = libroRepository.findAll().stream()
+                .mapToDouble(Libro::getNumeroDeDescargas)
+                .filter(d -> d > 0)
+                .summaryStatistics();
+
+        System.out.println("Mayor número de descargas: " + estadisticas.getMax());
+        System.out.println("Menor número de descargas: " + estadisticas.getMin());
+        System.out.println("Promedio de descargas: " + estadisticas.getAverage());
+    }
 }
