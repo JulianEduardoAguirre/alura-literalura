@@ -47,6 +47,7 @@ public class Principal {
                     8)  Mostrar autor más joven
                     9)  Mostrar top 5 libros descargados
                     10) Mostrar estadísticas
+                    11) Buscar autor por nombre
                     
                     0) Salir
                     """);
@@ -70,10 +71,32 @@ public class Principal {
             case "8" -> mostrarAutorMasJoven();
             case "9" -> mostrarTop10Descargas();
             case "10" -> mostrarEstadisticas();
+            case "11" -> buscarAutorPorNombre();
             case "0" -> System.out.println("Finalizando el programa.");
             default -> System.out.println("Opción inválida");
         }
 
+    }
+
+    private void buscarAutorPorNombre() {
+        var nombreAutor = "";
+        do{
+            System.out.println("Escriba el nombre del autor que desea buscar en la base de datos: ");
+            nombreAutor = scanner.next();
+            if (Objects.equals(nombreAutor, "")) {
+                System.out.println("Debe ingresar un nombre\n\n");
+            }
+        } while (Objects.equals(nombreAutor, ""));
+
+        List<Autor> autoresEncontrados = autorRepository.findByNombreContainingIgnoreCase(nombreAutor);
+        int cantidad = autoresEncontrados.size();
+
+        if (cantidad == 0) {
+            System.out.println("No se encontraron autores con un nombre parecido al solicitado");
+        } else {
+            System.out.println("Se encontraron los siguientes autores:\n");
+            autoresEncontrados.forEach(System.out::println);
+        }
     }
 
     private void mostrarTop10Descargas() {
@@ -165,14 +188,6 @@ public class Principal {
 
         System.out.println("Mostrando lista de autores");
         List<Autor> autores = autorRepository.findAll();
-
-//        List<Autor> toSort = new ArrayList<>(autores);
-//        toSort.sort((a1, a2) -> a1.getNombre().compareToIgnoreCase(a2.getNombre()));
-//        List<String> autoresString = new ArrayList<>();
-//        for (Autor autor : toSort) {
-//            String string = autor.toString();
-//            autoresString.add(string);
-//        }
 
         List<String> autoresStr = autores.stream().
                 sorted((a1, a2) -> a1.getNombre().compareToIgnoreCase(a2.getNombre()))
