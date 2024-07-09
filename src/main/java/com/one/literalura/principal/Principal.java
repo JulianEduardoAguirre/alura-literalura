@@ -163,6 +163,7 @@ public class Principal {
 
         if(libroBuscado.isPresent()){
 
+            //Aseguro que el libro no se encuentra salvado en la base de datos
             Optional<Libro> libroPorApiId = Optional.ofNullable(libroRepository.findByApiId(libroBuscado.get().apiId()));
 
             if(libroPorApiId.isPresent()){
@@ -172,17 +173,21 @@ public class Principal {
 
                 DatosLibro datosLibro = libroBuscado.get();
 
+                // Solo busco el primer autor (se supone que tiene, SIEMPRE, al menos uno)
                 DatosAutor datosAutor = datosLibro.autores().get(0);
 
+                // Busco el autor en la base de datos (solo puedo hacerlo por nombre, no posee Id propio (en la Gutendex) )
                 Optional<Autor> autorEnBaseDeDatos = Optional.ofNullable(autorRepository.findByNombreIgnoreCase(datosAutor.nombre()));
 
+                // Genero una nueva entidad Libro
                 Libro libro = new Libro(datosLibro);
 
+                // Adjudico el autor encontrado en la base de datos (en el caso de que hubiera existido en la misma, previamente)
                 autorEnBaseDeDatos.ifPresent(libro::setAutor);
 
                 libroRepository.save(libro);
 
-                System.out.println("Se guardó el libro en la base de datos");
+                System.out.println("Libro guardado en la base de datos");
             }
 
         } else {
