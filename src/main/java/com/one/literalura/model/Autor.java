@@ -34,7 +34,7 @@ public class Autor {
     public String toString() {
         return String.format("****************************************" +
                 "\nNombre: %s\nAño de nacimiento: %s\nAño de fallecimiento: %s\n" +
-                "****************************************\n", nombre, fechaDeNacimiento, fechaDeFallecimiento);
+                "****************************************\n", nombre, ((fechaDeNacimiento != null) ? fechaDeNacimiento: "No disponible"), (fechaDeFallecimiento != null) ? fechaDeFallecimiento: "No disponible");
     }
 
     public Long getId() {

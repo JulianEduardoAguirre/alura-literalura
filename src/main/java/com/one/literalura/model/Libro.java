@@ -73,12 +73,15 @@ public class Libro {
 
     @Override
     public String toString() {
-        return "Libro{" +
-                "id=" + id +
-                ", titulo='" + titulo + '\'' +
-                ", autor=" + autor +
-                ", numeroDeDescargas=" + numeroDeDescargas +
-                ", apiId=" + apiId +
-                '}';
+//        return "Libro{" +
+//                "id=" + id +
+//                ", titulo='" + titulo + '\'' +
+//                ", autor=" + autor +
+//                ", numeroDeDescargas=" + numeroDeDescargas +
+//                ", apiId=" + apiId +
+//                '}';
+        return String.format("_________________Libro__________________" +
+                "\nTítulo   :  %s\nAutor    :  %s\nDescargas:  %s\n" +
+                "_________________________________________\n", titulo, autor.getNombre(), numeroDeDescargas);
     }
 }
