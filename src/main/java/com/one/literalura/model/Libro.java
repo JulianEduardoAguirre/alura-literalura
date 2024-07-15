@@ -12,7 +12,7 @@ public class Libro {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String titulo;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "autor_id")
     private Autor autor;
 
@@ -73,6 +73,7 @@ public class Libro {
 
     public void setAutor(Autor autor) {
         this.autor = autor;
+        autor.setLibro(this);
     }
 
     public Integer getNumeroDeDescargas() {

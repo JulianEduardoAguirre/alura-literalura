@@ -6,6 +6,7 @@ import com.one.literalura.repository.LibroRepository;
 import com.one.literalura.service.ConsumoAPI;
 import com.one.literalura.service.ConvierteDatos;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -93,7 +94,7 @@ public class Principal {
         int cantidad = autoresEncontrados.size();
 
         if (cantidad == 0) {
-            System.out.println("No se encontraron autores con un nombre parecido al solicitado");
+            System.out.println("No se encontraron autores con un nombre similar al solicitado");
         } else {
             System.out.println("Se encontraron los siguientes autores:\n");
             autoresEncontrados.forEach(System.out::println);
@@ -185,7 +186,6 @@ public class Principal {
         System.out.println("Mostrando libros por idiomas");
         var idiomaBuscado = scanner.next();
 
-//        List<Libro> librosPorIdioma = libroRepository.findByIdiomasContaining(idiomaBuscado);
         List<Libro> librosPorIdioma = libroRepository.findByIdioma(idiomaBuscado);
         if (librosPorIdioma.isEmpty()) {
             System.out.println("No hay libros en ese idioma ");
@@ -216,12 +216,12 @@ public class Principal {
         List<Libro> librosGuardados = libroRepository.findAll();
 
 
-//        System.out.println(librosGuardados);
         librosGuardados.forEach(System.out::println);
     }
 
+    @Transactional
     private void buscarLibroPorTitulo() {
-    // Realiza la consulta, trae todos los libros con esa palabra en el título y retiene SOLAMENTE el primer resultado
+    // Realiza la consulta a la página, trae todos los libros con esa palabra en el título y retiene SOLAMENTE el primer resultado
         System.out.println("Inserte el título del libro a buscar");
         var tituloLibro = scanner.next();
         var json = consumoAPI.obtenerDatos(BASE_URL + "?search=" + tituloLibro.replace(" ", "+"));
@@ -245,15 +245,21 @@ public class Principal {
 
                 // Solo busco el primer autor (se supone que tiene, SIEMPRE, al menos uno)
                 DatosAutor datosAutor = datosLibro.autores().get(0);
+//                System.out.println(datosAutor);
 
                 // Busco el autor en la base de datos (solo puedo hacerlo por nombre, no posee Id propio (en la Gutendex) )
                 Optional<Autor> autorEnBaseDeDatos = Optional.ofNullable(autorRepository.findByNombreIgnoreCase(datosAutor.nombre()));
+//                System.out.println(autorEnBaseDeDatos.isPresent());
 
                 // Genero una nueva entidad Libro
                 Libro libro = new Libro(datosLibro);
 
                 // Adjudico el autor encontrado en la base de datos (en el caso de que hubiera existido en la misma, previamente)
-                autorEnBaseDeDatos.ifPresent(libro::setAutor);
+                if (autorEnBaseDeDatos.isPresent()) {
+                    var autor = autorEnBaseDeDatos.get();
+                    libro.setAutor(autor);
+                    autorRepository.save(autor);
+                }
 
                 libroRepository.save(libro);
 
