@@ -40,7 +40,7 @@ public class Libro {
     }
 
     public void setApiId(Long apiId) {
-        apiId = apiId;
+        this.apiId = apiId;
     }
 
     public Long getId() {

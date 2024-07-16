@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Component
 public class Principal {
@@ -36,22 +35,24 @@ public class Principal {
         var opcion = "";
         while (!opcion.equals("0")) {
             System.out.println("""
+                    
                     **** Bienvenido a LiterAlura ****
                     Ingrese el número correspondiente a su consulta
                     
                     1)  Buscar libro por título
                     2)  Listar libros registrados
-                    3)  Listar autores registrados
-                    4)  Listar autores vivos en un determinado año
-                    5)  Mostrar número de libros por idioma
-                    6)  Listar libros por idioma
-                    7)  Mostrar libro más descargado
-                    8)  Mostrar autor más joven
-                    9)  Mostrar top 5 libros descargados
+                    3)  Mostrar libros por idioma
+                    4)  Mostrar libro más descargado
+                    5)  Mostrar top descargas
+                    6)  Listar autores registrados
+                    7)  Mostrar autor más joven
+                    8)  Mostrar autor/es vivo/s en una fecha
+                    9)  Buscar autor por nombre
                     10) Mostrar estadísticas
-                    11) Buscar autor por nombre
-                    
+                    11) Menú de idiomas
+
                     0) Salir
+                    
                     """);
 
             opcion = scanner.next();
@@ -59,25 +60,159 @@ public class Principal {
         }
     }
 
-
-
     private void switchMenuPrincipal(String opcion) {
         switch (opcion) {
             case "1" -> buscarLibroPorTitulo();
             case "2" -> mostrarListaDeLibros();
-            case "3" -> mostrarListaDeAutores();
-            case "4" -> mostrarAutorVivoEnFecha();
-            case "5" -> menuIdiomas();
-            case "6" -> mostrarLibrosPorIdioma();
-            case "7" -> mostrarLibroMasDescargado();
-            case "8" -> mostrarAutorMasJoven();
-            case "9" -> mostrarTop10Descargas();
+            case "3" -> mostrarLibrosPorIdioma();
+            case "4" -> mostrarLibroMasDescargado();
+            case "5" -> mostrarTop10Descargas();
+            case "6" -> mostrarListaDeAutores();
+            case "7" -> mostrarAutorMasJoven();
+            case "8" -> mostrarAutorVivoEnFecha();
+            case "9" -> buscarAutorPorNombre();
             case "10" -> mostrarEstadisticas();
-            case "11" -> buscarAutorPorNombre();
+            case "11" -> menuIdiomas();
             case "0" -> System.out.println("Finalizando el programa.");
             default -> System.out.println("Opción inválida");
         }
+    }
 
+    @Transactional
+    private void buscarLibroPorTitulo() {
+        // Realiza la consulta a la página, trae todos los libros con esa palabra en el título y retiene SOLAMENTE el primer resultado
+        System.out.println("Inserte el título del libro a buscar");
+        var tituloLibro = scanner.next();
+        var json = consumoAPI.obtenerDatos(BASE_URL + "?search=" + tituloLibro.replace(" ", "+"));
+        var datosBusqueda = conversor.obtenerDatos(json, DatosTotal.class);
+
+        Optional<DatosLibro> libroBuscado = datosBusqueda.resultados().stream()
+                .filter(l -> l.titulo().toUpperCase().contains(tituloLibro.toUpperCase()))
+                .findFirst();
+
+        if(libroBuscado.isPresent()){
+
+            //Aseguro que el libro no se encuentra salvado en la base de datos
+            Optional<Libro> libroPorApiId = Optional.ofNullable(libroRepository.findByApiId(libroBuscado.get().apiId()));
+
+            if(libroPorApiId.isPresent()){
+                System.out.println("El libro ya se encuentra en la base de datos");
+            } else {
+                System.out.println("Libro encontrado ");
+
+                DatosLibro datosLibro = libroBuscado.get();
+
+                // Solo busco el primer autor (se supone que tiene, SIEMPRE, al menos uno)
+                DatosAutor datosAutor = datosLibro.autores().get(0);
+
+                // Busco el autor en la base de datos (solo puedo hacerlo por nombre, no posee Id propio (en la Gutendex) )
+                Optional<Autor> autorEnBaseDeDatos = Optional.ofNullable(autorRepository.findByNombreIgnoreCase(datosAutor.nombre()));
+
+                // Genero una nueva entidad Libro
+                Libro libro = new Libro(datosLibro);
+
+                // Adjudico el autor encontrado en la base de datos (en el caso de que hubiera existido en la misma, previamente)
+                if (autorEnBaseDeDatos.isPresent()) {
+                    var autor = autorEnBaseDeDatos.get();
+                    libro.setAutor(autor);
+                    autorRepository.save(autor);
+                } else {
+                    Autor autor = libro.getAutor();
+                    autorRepository.save(autor);
+                }
+
+                libroRepository.save(libro);
+
+                System.out.println("Libro guardado en la base de datos");
+            }
+
+        } else {
+            System.out.println("No se encontró ningún libro con esa palabra en el título.");
+        }
+    }
+
+    private void mostrarListaDeLibros() {
+
+        System.out.println("Lista de libros");
+        List<Libro> librosGuardados = libroRepository.findAll();
+
+
+        librosGuardados.forEach(System.out::println);
+    }
+
+    private void mostrarLibrosPorIdioma() {
+        System.out.println("""
+                Seleccione uno de los siguientes idiomas:
+                
+                es -> Español
+                en -> Inglés
+                fr -> Francés
+                de -> Alemán
+                
+                """);
+        var idiomaBuscado = scanner.next();
+
+        List<Libro> librosPorIdioma = libroRepository.findByIdioma(idiomaBuscado);
+        if (librosPorIdioma.isEmpty()) {
+            System.out.println("No hay libros en ese idioma ");
+        } else {
+            librosPorIdioma.forEach(System.out::println);
+        }
+
+    }
+
+    private void mostrarLibroMasDescargado() {
+        System.out.println(libroRepository.findTop1ByOrderByNumeroDeDescargasDesc());
+    }
+
+    private void mostrarTop10Descargas() {
+        List<Libro> topDescargados = libroRepository.findTop10ByOrderByNumeroDeDescargasDesc();
+        topDescargados.forEach(System.out::println);
+    }
+
+    private void mostrarListaDeAutores() {
+
+        System.out.println("Mostrando lista de autores");
+        List<Autor> autores = autorRepository.findAll();
+
+        List<String> autoresStr = autores.stream().
+                sorted((a1, a2) -> a1.getNombre().compareToIgnoreCase(a2.getNombre()))
+                .map(Autor::toString)
+                .toList();
+
+
+        autoresStr.forEach(System.out::println);
+
+    }
+
+    private void mostrarAutorMasJoven() {
+        System.out.println(autorRepository.findTop1ByFechaDeNacimientoNotNullOrderByFechaDeNacimientoDesc());
+    }
+
+    private void mostrarAutorVivoEnFecha() {
+        double anioActual = (double) LocalDate.now().getYear();
+        Double anio = -1.0;
+        do {
+            anio = pedirAnio();
+            if (anio <= 0 || anio > anioActual) {
+                System.out.println("Periodo válido: 0 - " + (int)anioActual);
+            }
+
+        } while (anio <= 0 || anio > anioActual);
+
+        Double finalAnio = anio;
+
+        List<Autor> autoresVivos =  autorRepository.findAll().stream()
+                .filter(autor -> autor.getFechaDeNacimiento() != null && autor.getFechaDeNacimiento() <= finalAnio)
+                .filter(autor -> autor.getFechaDeFallecimiento() == null || autor.getFechaDeFallecimiento() >= finalAnio)
+                .toList();
+
+        if (autoresVivos.isEmpty()){
+            System.out.println("No habían autores vivos ese año");
+        } else {
+            System.out.println("Se encontraron los siguientes autores vivos en el año " + finalAnio.intValue());
+            autoresVivos.forEach(System.out::println);
+        }
     }
 
     private void buscarAutorPorNombre() {
@@ -101,18 +236,20 @@ public class Principal {
         }
     }
 
-    private void mostrarTop10Descargas() {
-        List<Libro> topDescargados = libroRepository.findTop10ByOrderByNumeroDeDescargasDesc();
-        topDescargados.forEach(System.out::println);
+    public void mostrarEstadisticas() {
+
+        //Trabajando con estadísticas
+        DoubleSummaryStatistics estadisticas = libroRepository.findAll().stream()
+                .mapToDouble(Libro::getNumeroDeDescargas)
+                .filter(d -> d > 0)
+                .summaryStatistics();
+
+        System.out.println("Libros registrados: " + estadisticas.getCount());
+        System.out.println("Mayor número de descargas: " + estadisticas.getMax());
+        System.out.println("Menor número de descargas: " + estadisticas.getMin());
+        System.out.println("Promedio de descargas: " + estadisticas.getAverage());
     }
 
-    private void mostrarAutorMasJoven() {
-        System.out.println(autorRepository.findTop1ByFechaDeNacimientoNotNullOrderByFechaDeNacimientoDesc());
-    }
-
-    private void mostrarLibroMasDescargado() {
-        System.out.println(libroRepository.findTop1ByOrderByNumeroDeDescargasDesc());
-    }
 
     public void menuIdiomas() {
         var opcionIdioma = "";
@@ -156,120 +293,9 @@ public class Principal {
         }
 
     }
-    private void mostrarAutorVivoEnFecha() {
-        double anioActual = (double) LocalDate.now().getYear();
-        Double anio = -1.0;
-        do {
-            anio = pedirAnio();
-            if (anio <= 0 || anio > anioActual) {
-                System.out.println("Periodo válido: 0 - " + (int)anioActual);
-            }
-
-        } while (anio <= 0 || anio > anioActual);
-
-        Double finalAnio = anio;
-
-        List<Autor> autoresVivos =  autorRepository.findAll().stream()
-                .filter(autor -> autor.getFechaDeNacimiento() != null && autor.getFechaDeNacimiento() <= finalAnio)
-                .filter(autor -> autor.getFechaDeFallecimiento() == null || autor.getFechaDeFallecimiento() >= finalAnio)
-                .collect(Collectors.toList());
-
-        if (autoresVivos.isEmpty()){
-            System.out.println("No habían autores vivos ese año");
-        } else {
-            System.out.println("Se encontraron los siguientes autores vivos en el año " + finalAnio.intValue());
-            autoresVivos.forEach(System.out::println);
-        }
-    }
-
-    private void mostrarLibrosPorIdioma() {
-        System.out.println("Mostrando libros por idiomas");
-        var idiomaBuscado = scanner.next();
-
-        List<Libro> librosPorIdioma = libroRepository.findByIdioma(idiomaBuscado);
-        if (librosPorIdioma.isEmpty()) {
-            System.out.println("No hay libros en ese idioma ");
-        } else {
-            librosPorIdioma.forEach(System.out::println);
-        }
-
-    }
-
-    private void mostrarListaDeAutores() {
-
-        System.out.println("Mostrando lista de autores");
-        List<Autor> autores = autorRepository.findAll();
-
-        List<String> autoresStr = autores.stream().
-                sorted((a1, a2) -> a1.getNombre().compareToIgnoreCase(a2.getNombre()))
-                        .map(Autor::toString)
-                                .collect(Collectors.toList());
 
 
-        autoresStr.forEach(System.out::println);
 
-    }
-
-    private void mostrarListaDeLibros() {
-
-        System.out.println("Lista de libros");
-        List<Libro> librosGuardados = libroRepository.findAll();
-
-
-        librosGuardados.forEach(System.out::println);
-    }
-
-    @Transactional
-    private void buscarLibroPorTitulo() {
-    // Realiza la consulta a la página, trae todos los libros con esa palabra en el título y retiene SOLAMENTE el primer resultado
-        System.out.println("Inserte el título del libro a buscar");
-        var tituloLibro = scanner.next();
-        var json = consumoAPI.obtenerDatos(BASE_URL + "?search=" + tituloLibro.replace(" ", "+"));
-        var datosBusqueda = conversor.obtenerDatos(json, DatosTotal.class);
-
-        Optional<DatosLibro> libroBuscado = datosBusqueda.resultados().stream()
-                .filter(l -> l.titulo().toUpperCase().contains(tituloLibro.toUpperCase()))
-                .findFirst();
-
-        if(libroBuscado.isPresent()){
-
-            //Aseguro que el libro no se encuentra salvado en la base de datos
-            Optional<Libro> libroPorApiId = Optional.ofNullable(libroRepository.findByApiId(libroBuscado.get().apiId()));
-
-            if(libroPorApiId.isPresent()){
-                System.out.println("El libro ya se encuentra en la base de datos");
-            } else {
-                System.out.println("Libro encontrado ");
-
-                DatosLibro datosLibro = libroBuscado.get();
-
-                // Solo busco el primer autor (se supone que tiene, SIEMPRE, al menos uno)
-                DatosAutor datosAutor = datosLibro.autores().get(0);
-//                System.out.println(datosAutor);
-
-                // Busco el autor en la base de datos (solo puedo hacerlo por nombre, no posee Id propio (en la Gutendex) )
-                Optional<Autor> autorEnBaseDeDatos = Optional.ofNullable(autorRepository.findByNombreIgnoreCase(datosAutor.nombre()));
-//                System.out.println(autorEnBaseDeDatos.isPresent());
-
-                // Genero una nueva entidad Libro
-                Libro libro = new Libro(datosLibro);
-
-                // Adjudico el autor encontrado en la base de datos (en el caso de que hubiera existido en la misma, previamente)
-                if (autorEnBaseDeDatos.isPresent()) {
-                    var autor = autorEnBaseDeDatos.get();
-                    libro.setAutor(autor);
-                    autorRepository.save(autor);
-                }
-
-                libroRepository.save(libro);
-
-                System.out.println("Libro guardado en la base de datos");
-            }
-
-        } else {
-            System.out.println("No se encontró ningún libro con esa palabra en el título.");
-        }
-    }
 
     private boolean IsInteger(String text) {
         try {
@@ -289,17 +315,4 @@ public class Principal {
         return Double.parseDouble(anioString);
     }
 
-
-    public void mostrarEstadisticas() {
-
-        //Trabajando con estadísticas
-        DoubleSummaryStatistics estadisticas = libroRepository.findAll().stream()
-                .mapToDouble(Libro::getNumeroDeDescargas)
-                .filter(d -> d > 0)
-                .summaryStatistics();
-
-        System.out.println("Mayor número de descargas: " + estadisticas.getMax());
-        System.out.println("Menor número de descargas: " + estadisticas.getMin());
-        System.out.println("Promedio de descargas: " + estadisticas.getAverage());
-    }
 }
