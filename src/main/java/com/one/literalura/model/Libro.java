@@ -2,7 +2,6 @@ package com.one.literalura.model;
 
 import jakarta.persistence.*;
 
-import java.util.List;
 import java.util.OptionalInt;
 
 @Entity
@@ -18,8 +17,8 @@ public class Libro {
 
 //    @ElementCollection        //Usado para generar una tabla intermedia para un listado de idiomas
 //    private List<String> idiomas;
-    private String idioma;
 
+    private String idioma;
     private Integer numeroDeDescargas;
     private Long apiId;
 

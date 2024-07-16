@@ -9,13 +9,9 @@ import java.util.List;
 
 @Repository
 public interface LibroRepository extends JpaRepository<Libro, Long> {
-
     Libro findByApiId(Long apiId);
-
-//    List<Libro> findByIdiomasContaining(String idioma);   //Usado cuando buscaba TODOS los idiomas
+//    List<Libro> findByIdiomasContaining(String idioma);   //Usado cuando buscaba TODOS los idiomas - No usar
     List<Libro> findByIdioma(String idioma);
-
     List<Libro> findTop1ByOrderByNumeroDeDescargasDesc();
-
     List<Libro> findTop10ByOrderByNumeroDeDescargasDesc();
 }

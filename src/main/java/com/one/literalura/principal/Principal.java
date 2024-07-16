@@ -19,8 +19,6 @@ public class Principal {
     private final ConvierteDatos conversor = new ConvierteDatos();
     private LibroRepository libroRepository;
     private AutorRepository autorRepository;
-
-
     private final String BASE_URL = "http://gutendex.com/books/";
 
     public Principal() {
@@ -250,7 +248,6 @@ public class Principal {
         System.out.println("Promedio de descargas: " + estadisticas.getAverage());
     }
 
-
     public void menuIdiomas() {
         var opcionIdioma = "";
         while (!opcionIdioma.equals("0")) {
@@ -294,9 +291,7 @@ public class Principal {
 
     }
 
-
-
-
+//  FUNCIONES AUXILIARES
     private boolean IsInteger(String text) {
         try {
             Integer.parseInt(text);
